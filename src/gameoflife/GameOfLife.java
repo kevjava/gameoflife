@@ -67,6 +67,7 @@ public class GameOfLife extends BasicGame {
 			gc.setFullscreen(_fullScreen);
 		} else if (input.isKeyPressed(Input.KEY_R)) {
 			gc.reinit();
+			_generations = 0;
 		} else if (input.isKeyPressed(Input.KEY_P)) {
 			_paused = !_paused;
 			if (_paused) {
@@ -95,7 +96,7 @@ public class GameOfLife extends BasicGame {
 	public static void main(String... args) {
 		try {
 			AppGameContainer appGameContainer = new AppGameContainer(new GameOfLife("The Game of Life"));
-			appGameContainer.setDisplayMode(640, 480, false);
+			appGameContainer.setDisplayMode(1024, 768, false);
 			appGameContainer.start();
 		} catch (SlickException e) {
 			logger.log(Level.SEVERE, "Whoops: " + e.getMessage(), e);
