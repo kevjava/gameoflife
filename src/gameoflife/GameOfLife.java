@@ -16,6 +16,8 @@ public class GameOfLife extends BasicGame {
 	private static final int INITIAL_TICK_TIME = 250; // milliseconds
 	private static final int _tickTime = INITIAL_TICK_TIME;
 	private static long _lastTick = 0;
+
+	private boolean _fullScreen = false;
 	private GameOfLifeLogic _logic;
 	private GridView _gridView;
 
@@ -43,6 +45,9 @@ public class GameOfLife extends BasicGame {
 		Input input = gc.getInput();
 		if (input.isKeyPressed(Input.KEY_ESCAPE)) {
 			gc.exit(); // Quick escape.
+		} else if (input.isKeyPressed(Input.KEY_F)) {
+			_fullScreen = !_fullScreen;
+			gc.setFullscreen(_fullScreen);
 		}
 
 		long timeSinceLastTick = System.currentTimeMillis() - _lastTick;
