@@ -1,5 +1,7 @@
 package gameoflife;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -15,9 +17,14 @@ public class GameOfLife extends BasicGame {
 	private static Logger logger = Logger.getLogger(GameOfLife.class.getName());
 	private static final int INITIAL_TICK_TIME = 250; // milliseconds
 	private static final int _tickTime = INITIAL_TICK_TIME;
-	private static long _lastTick = 0;
 
+	private long _pauseTime = 0;
+	private long _lastTick = 0;
 	private boolean _fullScreen = false;
+	private boolean _paused = false;
+	private boolean _statistics = false;
+	private int _generations = 0;
+
 	private GameOfLifeLogic _logic;
 	private GridView _gridView;
 
@@ -32,12 +39,22 @@ public class GameOfLife extends BasicGame {
 		_gridView = new GridView(_logic.getCellsWide(), _logic.getCellsHigh(), _logic.getCellWidth(),
 				_logic.getCellHeight(), gc.getWidth(), gc.getHeight());
 		_lastTick = System.currentTimeMillis();
+		gc.setShowFPS(false);
 	}
 
 	@Override
 	public void render(GameContainer gc, Graphics graphics) throws SlickException {
-		float tickPercentage = ((float) (System.currentTimeMillis() - _lastTick) / (float) _tickTime);
-		_gridView.draw(graphics, _logic.getCellGrid(), tickPercentage);
+		long endTime = (_paused) ? _pauseTime : System.currentTimeMillis();
+		float tickPercentage = ((float) (endTime - _lastTick) / (float) _tickTime);
+		Map<String, Object> statistics = (_statistics) ? getStatistics() : new HashMap<String, Object>();
+		_gridView.draw(graphics, _logic.getCellGrid(), tickPercentage, statistics);
+	}
+
+	private Map<String, Object> getStatistics() {
+		Map<String, Object> statistics = new HashMap<String, Object>();
+		statistics.put("Generations", _generations);
+		statistics.put("Living cells", _logic.getLivingCellCount());
+		return statistics;
 	}
 
 	@Override
@@ -48,12 +65,24 @@ public class GameOfLife extends BasicGame {
 		} else if (input.isKeyPressed(Input.KEY_F)) {
 			_fullScreen = !_fullScreen;
 			gc.setFullscreen(_fullScreen);
+		} else if (input.isKeyPressed(Input.KEY_R)) {
+			gc.reinit();
+		} else if (input.isKeyPressed(Input.KEY_P)) {
+			_paused = !_paused;
+			if (_paused) {
+				_pauseTime = System.currentTimeMillis();
+			}
+		} else if (input.isKeyPressed(Input.KEY_S)) {
+			_statistics = !_statistics;
 		}
 
-		long timeSinceLastTick = System.currentTimeMillis() - _lastTick;
-		if (timeSinceLastTick > _tickTime) {
-			_logic.tick();
-			_lastTick += _tickTime;
+		if (!_paused) {
+			long timeSinceLastTick = System.currentTimeMillis() - _lastTick;
+			if (timeSinceLastTick > _tickTime) {
+				_lastTick = System.currentTimeMillis();
+				_logic.tick();
+				_generations++;
+			}
 		}
 	}
 
